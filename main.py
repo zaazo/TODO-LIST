@@ -2,70 +2,57 @@ import tkinter as tk
 from tkinter import messagebox
 
 class TodoListApp:
-    def __init__(self, master):
-        self.master = master
-        self.master.title("Minimal TodoList App")
-        self.master.geometry("400x300")
-        self.master.configure(bg='#222')
-        
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Material Todo List App")
+        self.root.configure(bg='#212121')  # Dark grey background
+        self.root.geometry("400x500")
+
         self.tasks = []
-        
-        self.input_frame = tk.Frame(self.master, bg='#222')
-        self.input_frame.pack(pady=10)
-        
-        self.task_label = tk.Label(self.input_frame, text="Task:", bg='#222', fg='white')
-        self.task_label.grid(row=0, column=0, padx=5)
-        
-        self.task_entry = tk.Entry(self.input_frame, width=30)
-        self.task_entry.grid(row=0, column=1, padx=5)
-        
-        self.importance_label = tk.Label(self.input_frame, text="Importance:", bg='#222', fg='white')
-        self.importance_label.grid(row=0, column=2, padx=5)
-        
-        self.importance_var = tk.StringVar(self.master)
-        self.importance_var.set("Low")  # default importance
-        
-        self.importance_option_menu = tk.OptionMenu(self.input_frame, self.importance_var, "Low", "Mid", "High")
-        self.importance_option_menu.config(bg='#222', fg='white', highlightbackground='#222')
-        self.importance_option_menu.grid(row=0, column=3, padx=5)
-        
-        self.add_button = tk.Button(self.input_frame, text="Add Task", command=self.add_task, bg='#64b5f6', fg='white', relief=tk.FLAT)
-        self.add_button.grid(row=0, column=4, padx=5)
-        
-        self.task_frame = tk.Frame(self.master, bg='#222')
-        self.task_frame.pack(pady=10)
-        
+
+        self.task_label = tk.Label(root, text="Task:", fg='white', bg='#212121', font=('Roboto', 16, 'bold'))
+        self.task_label.pack()
+
+        self.task_entry = tk.Entry(root, width=30, font=('Roboto', 12))
+        self.task_entry.pack()
+
+        self.importance_label = tk.Label(root, text="Importance:", fg='white', bg='#212121', font=('Roboto', 16, 'bold'))
+        self.importance_label.pack()
+
+        self.importance_var = tk.StringVar(root)
+        self.importance_var.set("low")  # Default importance
+        self.importance_dropdown = tk.OptionMenu(root, self.importance_var, "low", "mid", "high")
+        self.importance_dropdown.config(bg='#212121', fg='white', font=('Roboto', 12), highlightthickness=0)
+        self.importance_dropdown.pack()
+
+        self.add_button = tk.Button(root, text="Add Task", command=self.add_task, bg='#4CAF50', fg='white', font=('Roboto', 14, 'bold'), relief=tk.GROOVE)
+        self.add_button.pack(pady=10)
+
+        self.task_listbox = tk.Listbox(root, width=35, height=10, bg='#424242', fg='white', font=('Roboto', 12))
+        self.task_listbox.pack(pady=10)
+
+        self.delete_button = tk.Button(root, text="Delete Task", command=self.delete_task, bg='#FF5722', fg='white', font=('Roboto', 14, 'bold'), relief=tk.GROOVE)
+        self.delete_button.pack()
+
     def add_task(self):
-        task_text = self.task_entry.get()
+        task = self.task_entry.get()
         importance = self.importance_var.get()
-        
-        if task_text.strip() != "":
-            self.tasks.append((task_text, importance))
-            self.display_tasks()
+        if task:
+            self.tasks.append((task, importance))
+            self.task_listbox.insert(tk.END, f"{task} - {importance}")
             self.task_entry.delete(0, tk.END)
         else:
-            messagebox.showwarning("Warning", "Task cannot be empty!")
-    
-    def display_tasks(self):
-        for widget in self.task_frame.winfo_children():
-            widget.destroy()
-        
-        for i, task in enumerate(self.tasks, start=1):
-            task_text, importance = task
-            task_label = tk.Label(self.task_frame, text=f"{i}. {task_text} - {importance}", bg='#222', fg='white')
-            task_label.pack(anchor=tk.W, pady=5)
-            
-            delete_button = tk.Button(self.task_frame, text="Delete", bg='#f44336', fg='white', relief=tk.FLAT, command=lambda index=i-1: self.delete_task(index))
-            delete_button.pack(anchor=tk.W, pady=5)
-    
-    def delete_task(self, index):
-        del self.tasks[index]
-        self.display_tasks()
+            messagebox.showwarning("Warning", "Please enter a task.")
 
-def main():
+    def delete_task(self):
+        try:
+            selected_index = self.task_listbox.curselection()[0]
+            self.task_listbox.delete(selected_index)
+            del self.tasks[selected_index]
+        except IndexError:
+            messagebox.showwarning("Warning", "Please select a task to delete.")
+
+if __name__ == "__main__":
     root = tk.Tk()
     app = TodoListApp(root)
     root.mainloop()
-
-if __name__ == "__main__":
-    main()
